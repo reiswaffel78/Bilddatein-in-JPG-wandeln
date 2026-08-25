@@ -60,9 +60,8 @@ Object Store: history (freigegeben, siehe RISKS.md — Implementierung in Phase 
 - Pool-Größe: `min(navigator.hardwareConcurrency - 1, 4)`, per UI überschreibbar. Ein Wert von 0 wird auf 1 angehoben (Hauptthread bleibt frei für UI).
 - Batch-Jobs laufen sequenziell pro Worker-Slot — kein Worker verarbeitet zwei Dateien gleichzeitig.
 - Nach jeder Datei wird die WASM-Instanz recycelt (Worker terminieren und neu erzeugen, oder expliziter Reset-Call der Engine), da Emscripten-Heaps Speicher nicht zuverlässig freigeben.
-- iOS/Safari lädt die `lowmem`-Variante von wasm-vips (256 MB Cap) statt der Desktop-Variante.
+- ~~iOS/Safari lädt die `lowmem`-Variante von wasm-vips (256 MB Cap)~~ — entfällt für Tier 1, da `wasm-vips` dort nicht eingesetzt wird (siehe RISKS.md R2). Die `@jsquash/*`-Codecs sind pro Konvertierung deutlich kleinere Single-Purpose-WASM-Module ohne eigenen Lowmem-Modus; das Recycling nach jedem Job (Punkt oben) ist hier die primäre Speicherschutzmaßnahme.
 - Vor Batch-Start wird der geschätzte Peak-Speicher (Dateigröße × Faktor je Engine/Pfad) berechnet; bei Überschreitung einer konfigurierbaren Schwelle warnt die UI, statt zu starten und abzustürzen.
-- Oberhalb dieser Schwelle nutzt vips seine Streaming-Pipeline statt Vollpuffer-Dekodierung.
 - Ein OOM in einem Worker lässt nur den betroffenen Job als `failed` fehlschlagen; der Worker wird neu erzeugt, die Queue läuft weiter.
 - Zwischenergebnisse (dekodierte Zwischenformate, Seiten aus Multipage-Quellen) liegen in OPFS, nicht in Worker-Message-Payloads.
 

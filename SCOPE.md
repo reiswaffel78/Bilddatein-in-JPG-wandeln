@@ -1,8 +1,40 @@
 # Scope
 
-Phase-0-Dokument. Was Version 1 exakt kann und was ausdrücklich nicht — als Referenz für Erwartungsmanagement gegenüber dem kleinen Nutzerkreis (Entwickler + Freunde) und als Leitplanke gegen Scope Creep.
+Was Version 1 exakt kann und was ausdrücklich nicht — als Referenz für Erwartungsmanagement gegenüber dem kleinen Nutzerkreis (Entwickler + Freunde) und als Leitplanke gegen Scope Creep.
 
 „Version 1" bezeichnet hier den Stand nach Abschluss von Phase 1–2 (Tier 1 vollständig, Kernbedienung, Batch, PWA-Grundgerüst). Tier 2/3 sind separat markiert, da sie eigene Freigaben durchlaufen.
+
+## Implementierungsstand (nach Phase 1)
+
+Diese Datei beschreibt den **Zielzustand** von Version 1. Tatsächlich im Code umgesetzt und per Test abgesichert ist bisher ein Teil davon:
+
+**Fertig, getestet, funktioniert end-to-end (31 Vitest-Unit-Tests + 2 Playwright-E2E-Tests, `npm run build` liefert einen sauberen Static Export):**
+- Lesen/Schreiben von JPEG, PNG, WebP, AVIF, TIFF, GIF, BMP, JPEG XL über `@jsquash/*` (nicht wasm-vips, siehe RISKS.md); Lesen von ICO, SVG (sanitized rasterisiert), PPM/PGM/PBM
+- Capability-Matrix mit Laufzeit-Probe für GIF/BMP-Nativdecoding
+- Worker-Pool mit Pro-Job-Recycling, Pause/Resume/Cancel/Retry, OOM-Klassifizierung
+- OPFS-Scratch-Storage (mit In-Memory-Fallback)
+- Resize (alle Modi), Rotate, Flip, Qualität, Chroma-Subsampling, Hintergrundfarbe bei Alpha→JPEG
+- EXIF-Orientation-Korrektur vor jeder Transformation; EXIF-Komplettübernahme nur für JPEG→JPEG (keine Feldfilterung)
+- Dekompressionsbomben-Schutz über Header-Parsing (JPEG/PNG/GIF/BMP/WebP)
+- Batch-Queue, ZIP-Download via `client-zip`, Diagnosebericht-Button
+- CSP/COOP/COEP-Header, per E2E-Test verifiziert „kein Request an eine fremde Domain"
+- i18n DE/EN (Post-Mount-Erkennung, SSR-hydration-sicher)
+
+**Im Code vorbereitet, aber nicht an die UI angebunden:**
+- Batch-Rename-Variablen (`domain/rename.ts`, getestet) — kein Rename-Feld im UI
+- IndexedDB-Presets-Schema und die fünf Standard-Presets (`storage/indexeddb/presets.ts`) — kein Presets-Dropdown im UI
+- `ConvertOptions.crop` — Pipeline unterstützt Crop, kein UI-Steuerelement dafür
+
+**Nicht implementiert, ausstehend:**
+- PWA/Service Worker/Offline-Fähigkeit (Kap. 14) — noch nicht begonnen
+- Colorspace-/ICC-Transformation, DPI-Metadatenfeld (Felder existieren in `ConvertOptions`, sind aber Pipeline-seitig wirkungslos — bewusst aus dem UI entfernt, um nichts zu behaupten, was nicht stimmt, siehe RISKS.md)
+- Granulare Metadaten-Filterung pro Feld (nur pauschales EXIF-Keep/Strip für JPEG→JPEG)
+- Animierte Quellen/Multipage: nur erster Frame/erstes Bild, kein „alle Frames"- oder „Animation erhalten"-Modus
+- Ordner-Upload und File System Access API (Direktschreiben in Zielordner)
+- Bildanpassungen (Helligkeit/Kontrast/Sättigung/Schärfe/Gamma/Schwarzweiß), Wasserzeichen, Vergleichsmodus
+- Golden-File-Tests mit Butteraugli/SSIM, `BENCHMARKS.md`, Lighthouse-Audit
+- Conversion History (Entscheidung liegt vor: wird gebaut, siehe RISKS.md — Umsetzung steht noch aus)
+- Alles ab Tier 2 (RAW, PSD/PSB, PDF, HEIC-Decode) und Tier 3 (Ghostscript, Raster→SVG) — wie geplant erst nach Tier 1
 
 ## Was Version 1 kann
 

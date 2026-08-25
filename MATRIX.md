@@ -1,24 +1,24 @@
 # Format Matrix
 
-Diese Datei beschreibt die **geplante** Formatabdeckung nach Tier, mit vorgesehener Engine und Conversion-Type. Sie ist keine Implementierung der Laufzeit-Capability-Matrix aus Kapitel 5 — die reale Matrix wird zur Laufzeit aus einem Probe-Lauf der Engines gebaut und kann je nach Browser abweichen (fehlende Codecs, fehlende Loader/Saver in der geladenen wasm-vips-Variante). Diese Tabelle ist die Planungsgrundlage für diesen Probe-Lauf, kein Ersatz dafür.
+Diese Datei beschreibt die Formatabdeckung nach Tier, mit tatsächlich genutzter Engine und Conversion-Type. Die Tier-1-Spalte „Engine" ist inzwischen **Implementierungsstand, nicht mehr nur Planung** — siehe `RISKS.md` R2/R3: `wasm-vips` wird für Tier 1 nicht verwendet, stattdessen `@jsquash/*` (jsquash), UTIF.js, sowie eigene schmale Encoder/Decoder für BMP/GIF/ICO/PPM. Tier 2/3 sind weiterhin Planung. Die reale Laufzeit-Capability-Matrix (Kapitel 5) wird aus `domain/matrix/build.ts` gebaut — diese Tabelle ist die menschenlesbare Übersicht dazu, kein Ersatz.
 
 Conversion-Types folgen Kapitel 5: `native`, `render`, `rasterize`, `embed`, `trace`.
 
-## Tier 1 — MVP, muss funktionieren
+## Tier 1 — MVP, implementiert
 
-| Format | Lesen | Schreiben | Engine | Type | Offene Fragen |
+| Format | Lesen | Schreiben | Engine | Type | Stand / offene Punkte |
 |---|---|---|---|---|---|
-| JPEG/JPG/JFIF | ✓ | ✓ | wasm-vips | native | mozjpeg-Encoder-Parameter (progressiv, Subsampling) final in Phase 1 festlegen |
-| PNG | ✓ | ✓ | wasm-vips | native | Palette-PNG vs. Truecolor-Ausgabe als Option? |
-| WebP | ✓ | ✓ | wasm-vips | native | Animation erhalten vs. erster Frame — UI-Auswahl nötig (Kap. 9) |
-| AVIF | ✓ | ✓ | wasm-vips | native | HDR/10-bit → SDR Tone Mapping: konkretes Verfahren noch zu wählen |
-| TIFF/TIF | ✓ | ✓ | wasm-vips (Fallback UTIF.js) | native | Multipage-Handling (alle Seiten vs. erste) |
-| GIF | ✓ | ✓ | wasm-vips / @jsquash | native | Animation erhalten nur wenn Zielformat es kann — Matrix muss das pro Zielpaar ausweisen |
-| BMP | ✓ | ✓ | wasm-vips | native | keine offen |
-| JPEG XL | ✓ | ✓ | wasm-vips (vips-jxl.wasm) | native | Browser-native Unterstützung uneinheitlich — abhängig vom Probe-Ergebnis pro Browser |
-| ICO | ✓ | – | wasm-vips / @jsquash | native | Nur Lesen, wie in Kapitel 6 festgelegt |
-| SVG | ✓ | – | Browser (`<img>`/blob: oder sandboxed iframe) + DOMPurify | rasterize | Rasterisierungsgröße ist Pflichtfeld, siehe SECURITY.md |
-| PPM/PGM/PBM | ✓ | – | wasm-vips | native | Nur Lesen, wie in Kapitel 6 festgelegt |
+| JPEG/JPG/JFIF | ✓ | ✓ | `@jsquash/jpeg` (mozjpeg) | native | Progressiv + Chroma-Subsampling (4:2:0/4:4:4) im UI wählbar. EXIF-Komplettübernahme nur JPEG→JPEG, siehe RISKS.md. |
+| PNG | ✓ | ✓ | `@jsquash/png` (oxipng) | native | Kein separater Palette-vs-Truecolor-Schalter. |
+| WebP | ✓ | ✓ | `@jsquash/webp` | native | Nur erster Frame; kein Animation-Erhalt. |
+| AVIF | ✓ | ✓ | `@jsquash/avif` | native | Kein HDR→SDR-Tone-Mapping (kein HDR-Tier-1-Quellformat). |
+| TIFF/TIF | ✓ | ✓ | UTIF.js | native | Nur Baseline-TIFF; nur erste Seite bei Multipage. |
+| GIF | ✓ | ✓ | Lesen: native-canvas (`createImageBitmap`) · Schreiben: eigener GIF89a-Encoder (Median-Cut-Quantisierung) | native | Nur Einzelbild — kein animiertes GIF-Schreiben, kein Multi-Frame-Lesen. |
+| BMP | ✓ | ✓ | Eigener Encoder (unkomprimiert, 32bpp) · Lesen über native-canvas | native | Kein RLE-Schreiben (unkomprimiert reicht für den Zweck). |
+| JPEG XL | ✓ | ✓ | `@jsquash/jxl` | native | Native Browser-Unterstützung uneinheitlich, daher immer über jsquash-WASM, unabhängig vom Probe-Ergebnis. |
+| ICO | ✓ | – | Eigener Parser (größten Eintrag wählen, PNG- oder BMP-DIB-Entry) | native | Nur Lesen, wie in Kapitel 6 festgelegt. |
+| SVG | ✓ | – | DOMPurify (Sanitizing) + `<img>`/`createImageBitmap` (Rasterisierung) | rasterize | Rasterisierungsgröße ist Pflichtfeld, siehe SECURITY.md. |
+| PPM/PGM/PBM | ✓ | – | Eigener Parser (P1/P2/P3/P5/P6; P4 binär nicht unterstützt) | native | Nur Lesen, wie in Kapitel 6 festgelegt. |
 
 ## Tier 2 — nach Freigabe von Tier 1
 

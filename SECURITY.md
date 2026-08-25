@@ -44,13 +44,13 @@ Phase-0-Dokument. Die Angriffsfläche ist ohne Server klein — kein Endpunkt ni
 - `Cross-Origin-Opener-Policy: same-origin` und `Cross-Origin-Embedder-Policy: require-corp` werden gesetzt.
 - Als Konsequenz müssen alle eingebundenen Subressourcen (Fonts, WASM, evtl. Worker-Skripte) `same-origin` oder mit `Cross-Origin-Resource-Policy` versehen sein — daher self-hosting aller WASM-Module statt CDN-Bezug.
 
-### 6. Emscripten `unsafe-eval`
-**Bedrohung:** Manche Emscripten-Builds nutzen `eval`-artige Codepfade (z. B. für dynamische Funktionszeiger-Tabellen), was eine CSP-Lockerung auf `unsafe-eval` erzwingen könnte — ein realer Sicherheitsverlust, wenn er unbemerkt bleibt.
+### 6. Emscripten `unsafe-eval` / WebAssembly-Kompilierung
+**Bedrohung:** Manche Emscripten-Builds nutzen `eval`-artige Codepfade (z. B. für dynamische Funktionszeiger-Tabellen), was eine CSP-Lockerung erzwingen könnte — ein realer Sicherheitsverlust, wenn er unbemerkt bleibt oder breiter als nötig gewählt wird.
 
 **Gegenmaßnahmen:**
-- Jede eingesetzte Engine wird darauf geprüft, ob sie `unsafe-eval` benötigt.
-- Falls unvermeidbar, wird das explizit in dieser Datei dokumentiert (Update nötig, sobald die konkrete wasm-vips-Build-Konfiguration in Phase 1 feststeht) — es wird nicht stillschweigend in die CSP aufgenommen.
-- **Status Phase 0:** noch nicht geprüft, da noch keine konkrete Build-Pipeline existiert. Offener Punkt für Phase 1.
+- Jede eingesetzte Engine wird darauf geprüft, ob sie eine CSP-Lockerung benötigt.
+- **Status Phase 1 (bestätigt, nicht mehr offen):** Die jsquash-Encoder (u. a. mozjpeg, Emscripten-kompiliert) rufen `WebAssembly.instantiate()` auf eine Art auf, die Chromium ohne `'wasm-unsafe-eval'` in `script-src` mit `CompileError: WebAssembly.instantiate(): Refused to compile or instantiate WebAssembly module` ablehnt — ein Playwright-E2E-Test hat das aufgedeckt (die Konvertierung schlug fehl, bis die Direktive ergänzt wurde).
+- **Gewählte Direktive: `'wasm-unsafe-eval'`, nicht das breitere `'unsafe-eval'`.** `'wasm-unsafe-eval'` (CSP Level 3) erlaubt ausschließlich das Kompilieren/Instanziieren von WebAssembly-Modulen — nicht `eval()`, nicht `new Function()`, nicht String-basiertes `setTimeout`. Das ist die engstmögliche Lockerung für dieses Bedürfnis und bewusst dokumentiert statt stillschweigend übernommen.
 
 ### 7. Speichererschöpfung als Sicherheitsproblem
 Siehe Kapitel 8 / ARCHITECTURE.md — ein OOM ist hier primär ein Stabilitäts-, nicht in erster Linie ein Security-Thema, wird aber aus Verfügbarkeitssicht mitgeführt: Ein einzelner Job darf abstürzen, nie die gesamte Queue oder der Tab.
@@ -61,6 +61,7 @@ Ausgeliefert über Netlifys `_headers`-Datei.
 
 ```
 default-src 'self';
+script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval';
 img-src 'self' blob: data:;
 connect-src 'self';
 frame-src 'self' blob:;
@@ -74,6 +75,7 @@ base-uri 'none';
 | Direktive | Wert | Begründung |
 |---|---|---|
 | `default-src` | `'self'` | Restriktiver Fallback für jede Ressourcenart ohne eigene Direktive — nichts wird implizit von Fremdhosts geladen. |
+| `script-src` | `'self' 'unsafe-inline' 'wasm-unsafe-eval'` | **Zwei Ergänzungen gegenüber dem Phase-0-Entwurf, beide durch den Phase-1-E2E-Test aufgedeckt:** `'unsafe-inline'`, weil Next.js' App Router auch im vollständig statischen Export kleine ausführbare Inline-`<script>`-Tags einbettet (u. a. den React-Server-Components-Streaming-Payload `self.__next_f.push(...)`) — ohne das führt die CSP dazu, dass die App gar kein eigenes JavaScript mehr ausführt. `'wasm-unsafe-eval'`, weil die Emscripten-kompilierten jsquash-Encoder (mozjpeg u. a.) `WebAssembly.instantiate()` sonst mit einem `CompileError` verweigert bekommen (siehe Punkt 6 oben) — bewusst die enge WASM-spezifische Direktive, nicht das breitere `'unsafe-eval'`. Alle Skripte kommen weiterhin ausschließlich von `'self'`, kein Fremdhost ist erlaubt. |
 | `img-src` | `'self' blob: data:'` | `blob:` für aus WASM-Konvertierung erzeugte Vorschau-/Ergebnisbilder und für sanitized SVG-Rasterisierung; `data:` für kleine eingebettete Testbilder der Capability-Probe (Kap. 5). Kein Fremdhost, da keine externen Bilder geladen werden müssen. |
 | `connect-src` | `'self'` | Verhindert jeden `fetch`/`XHR`/WebSocket zu einer fremden Domain — das ist die technische Durchsetzung des „kein Endpunkt"-Versprechens, per Playwright-Test verifiziert. |
 | `frame-src` | `'self' blob:'` | `blob:` wird für das sandboxed iframe zur SVG-Rasterisierung benötigt (Alternative zum `<img>`-Pfad); kein Fremd-Frame nötig. |
@@ -81,7 +83,7 @@ base-uri 'none';
 | `object-src` | `'none'` | Kein Plugin-Content (Flash, Java-Applets o.ä.) — reduziert Angriffsfläche ohne Funktionsverlust, da nichts davon genutzt wird. |
 | `base-uri` | `'none'` | Verhindert, dass eine injizierte `<base>`-Tag relative URLs der Seite auf einen fremden Host umbiegt. |
 
-Falls ein Emscripten-Build `unsafe-eval` in `script-src` erzwingt, wird das hier nachgetragen und explizit begründet (siehe Punkt 6 oben) — Stand Phase 0 ist keine solche Lockerung vorgesehen.
+Beide Ergänzungen wurden nicht spekulativ vorgenommen, sondern erst, nachdem der Playwright-E2E-Test die App tatsächlich in einem Browser mit dieser CSP hat scheitern lassen — reproduzierbar über `npx playwright test` gegen den in `scripts/serve-static.mjs` nachgebildeten Header-Satz.
 
 ### Zusätzliche Header
 

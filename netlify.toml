@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Keine Functions, keine Edge Functions, kein serverbedürftiger Build-Plugin.
+# Falls der Build so etwas anlegen will, ist die Konfiguration falsch (Kap. 20).
