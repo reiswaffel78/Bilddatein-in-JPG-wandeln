@@ -39,9 +39,7 @@ Phase-0-Dokument. Lizenzlage jeder geplanten Abhängigkeit aus Kapitel 3, 4 und 
 **Lizenz: AGPL-3.0.**
 Ghostscript ist unter AGPL lizenziert, sobald keine kommerzielle Artifex-Lizenz erworben wird. AGPL Section 13 erweitert die Copyleft-Pflicht der GPL auf **Netzwerknutzung**: Wird die Software (auch nur als Teil einer Web-App, mit der Nutzer über ein Netzwerk interagieren) öffentlich erreichbar gemacht, muss der **vollständige korrespondierende Quellcode der gesamten kombinierten Anwendung** unter AGPL-kompatibler Lizenz offengelegt werden — nicht nur der Ghostscript-Teil.
 
-Das ist für dieses Projekt eine Alles-oder-Nichts-Entscheidung: entweder das gesamte Repository wird AGPL-kompatibel offengelegt (was bei einem ohnehin z. B. öffentlich auf GitHub liegenden Hobby-Projekt praktisch unproblematisch sein *kann*, aber explizit gewählt werden muss und alle anderen Lizenzen im Projekt AGPL-kompatibel sein müssen), oder EPS/AI/PostScript-Support entfällt.
-
-**Diese Entscheidung wird hier nicht getroffen.** Siehe `RISKS.md`, „Offene Entscheidung 1".
+**Entscheidung getroffen (siehe `RISKS.md`): Ja.** Das gesamte Repository wird bei Integration von Ghostscript-WASM unter einer AGPL-3.0-kompatiblen Lizenz offengelegt. Damit ist EPS/AI/PostScript-Support grundsätzlich freigegeben — bleibt aber Tier 3 und wird erst nach Phase 1–3 umgesetzt. Vor der tatsächlichen Integration braucht das Repository eine explizite `LICENSE`-Datei (z. B. AGPL-3.0), die aktuell noch fehlt, weil noch keine AGPL-Abhängigkeit eingebunden ist.
 
 ### potrace (Tier 3, `trace`-Modus)
 GPL-2.0, kein AGPL — die Netzwerk-Klausel greift hier nicht, aber Distribution des kompilierten WASM-Artefakts unterliegt weiterhin GPL-Copyleft-Pflichten für den Ghostscript-artigen Teil. Weniger kritisch als Ghostscript, aber vor Tier-3-Freigabe separat zu prüfen — insbesondere, welches konkrete WASM-Portierungspaket verwendet wird und ob es zusätzliche Bedingungen mitbringt.

@@ -36,8 +36,8 @@ Phase-0-Dokument. Was Version 1 exakt kann und was ausdrücklich nicht — als R
 - **RAW, PSD/PSB, PDF-Konvertierung sind nicht Teil von Version 1** — sie gehören zu Tier 2 / Phase 3 und erscheinen erst nach eigener Freigabe.
 - **PSD/PSB-Layer-Rekonstruktion** ist nie vorgesehen (auch nicht in Tier 2) — nur der gespeicherte Composite.
 - **CMYK-Farbraum** nur, falls eine Engine ihn sauber unterstützt; sonst dauerhaft weggelassen statt fehlerhaft angeboten.
-- **Raster → SVG (Tier 3), EPS/AI/PostScript via Ghostscript (Tier 3)** sind nicht Teil von Version 1 und benötigen jeweils eine explizite Einzelfreigabe — Ghostscript zusätzlich eine AGPL-Lizenzentscheidung, siehe `RISKS.md`.
-- **Conversion History** ist nicht automatisch Teil von Version 1 — siehe „Offene Entscheidung 2" in `RISKS.md`; falls freigegeben, standardmäßig deaktiviert (Opt-in).
+- **Raster → SVG (Tier 3), EPS/AI/PostScript via Ghostscript (Tier 3)** sind nicht Teil von Version 1 und benötigen jeweils eine explizite Einzelfreigabe pro Feature. Die AGPL-Lizenzfrage für Ghostscript ist bereits geklärt (Repository wird bei Integration AGPL-kompatibel offengelegt, siehe `RISKS.md`) — das hebt Tier 3 nicht in Version 1, es bleibt Phase-3/4-Umfang.
+- **Conversion History** ist nicht Teil von Version 1 (Phase 1–2), sondern erst ab Phase 2 vorgesehen — die Entscheidung, sie im vollen Kapitel-13-Umfang zu bauen, ist bereits getroffen (siehe `RISKS.md`), Umsetzung erfolgt aber zum vorgesehenen Zeitpunkt, nicht vorgezogen. Standardmäßig deaktiviert (Opt-in).
 - **Kein Feature, kein Button für nicht implementierte Funktionen** — auch nicht ausgegraut oder als „demnächst" markiert. Was nicht funktioniert, erscheint nirgends in der UI.
 
 ## Kriterium für jede zukünftige Erweiterung

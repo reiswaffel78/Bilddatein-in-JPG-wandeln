@@ -40,7 +40,7 @@ Object Store: settings
     key: string           // z.B. "workerPoolSize", "history.enabled", "history.retentionDays"
     value: unknown
 
-Object Store: history (nur falls Kapitel 13 freigegeben wird — siehe RISKS.md)
+Object Store: history (freigegeben, siehe RISKS.md — Implementierung in Phase 2)
   keyPath: id (uuid)
   indexes: timestamp
   fields:

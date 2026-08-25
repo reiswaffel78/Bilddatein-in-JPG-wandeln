@@ -1,26 +1,26 @@
 # Risks & Open Decisions
 
-Phase-0-Dokument. Enthält die beiden in Kapitel 6 markierten offenen Entscheidungen — als Rückfragen, nicht als getroffene Wahl — sowie eigene Einschätzungen zu Anforderungen aus dem Auftrag, die für nicht umsetzbar, unrealistisch oder falsch priorisiert gehalten werden. Diese Datei ist bei jedem Phasenabschluss zu aktualisieren (Kapitel 23).
+Phase-0-Dokument. Enthält die beiden in Kapitel 6 markierten Entscheidungen — inzwischen vom Auftraggeber beantwortet, siehe unten — sowie eigene Einschätzungen zu Anforderungen aus dem Auftrag, die für nicht umsetzbar, unrealistisch oder falsch priorisiert gehalten werden. Diese Datei ist bei jedem Phasenabschluss zu aktualisieren (Kapitel 23).
 
-## Offene Entscheidungen aus Kapitel 6 — Rückfrage an den Auftraggeber
+## Entscheidungen aus Kapitel 6 — beantwortet
 
-### Offene Entscheidung 1: Ghostscript-WASM (EPS/AI/PostScript, Tier 3)
+### Entscheidung 1: Ghostscript-WASM (EPS/AI/PostScript, Tier 3) — **Beantwortet: Code wird offengelegt**
 Ghostscript ist AGPL-3.0-lizenziert. AGPL Section 13 erweitert die Copyleft-Pflicht auf Netzwerknutzung: Sobald die App öffentlich über ein Netzwerk erreichbar ist — was auf Netlify der Fall ist, auch bei nur zweistelligem Nutzerkreis —, muss der vollständige korrespondierende Quellcode der **gesamten kombinierten Anwendung** unter einer AGPL-kompatiblen Lizenz verfügbar gemacht werden, nicht nur der Ghostscript-Teil.
 
-**Diese Entscheidung wird hier nicht getroffen.** Es braucht eine explizite Antwort auf:
-- Ist der Auftraggeber bereit, das gesamte Repository unter einer AGPL-kompatiblen Lizenz offenzulegen, damit EPS/AI/PostScript-Support gebaut werden kann?
-- Falls nein: EPS/AI/PostScript entfällt ersatzlos aus Tier 3, dauerhaft, nicht nur „vorerst".
-- Falls ja: alle anderen Abhängigkeiten im Projekt müssen auf AGPL-Kompatibilität geprüft werden (siehe `LICENSES.md`) — nicht nur die Ghostscript-Einbindung selbst.
+**Entscheidung des Auftraggebers:** Ja — das gesamte Repository wird unter einer AGPL-kompatiblen Lizenz offengelegt, damit EPS/AI/PostScript-Support (Tier 3) gebaut werden darf.
 
-Es gibt keine dritte Option (z. B. „nur ein bisschen AGPL"). Solange keine Antwort vorliegt, bleibt Ghostscript-WASM ungebaut.
+Konsequenzen für die weitere Umsetzung:
+- Das Repository braucht eine explizite `LICENSE`-Datei mit einer AGPL-3.0-kompatiblen Lizenz (z. B. AGPL-3.0 selbst), sobald Ghostscript tatsächlich integriert wird — vor Tier-3-Implementierung nachzutragen.
+- Alle anderen Abhängigkeiten sind bereits MIT/Apache/BSD/LGPL (siehe `LICENSES.md`) und damit mit AGPL kombinierbar — keine weitere Prüfung nötig, außer bei künftigen neuen Abhängigkeiten.
+- Ghostscript-WASM bleibt trotzdem Tier 3 und wird erst nach den in Kapitel 22 vorgesehenen Phasen 1–3 angegangen, nicht vorgezogen.
+- Die Lizenzwahl gilt für das gesamte Projekt ab dem Moment, in dem Ghostscript integriert wird — nicht rückwirkend nötig, solange Tier 3 noch nicht gebaut ist.
 
-### Offene Entscheidung 2: Conversion History (Kapitel 13)
-`ARCHITECTURE.md` beschreibt das IndexedDB-Schema für eine mögliche History-Funktion, `SCOPE.md` führt sie als nicht automatisch in Version 1 enthalten. Implementiert wird sie nicht ohne Freigabe.
+### Entscheidung 2: Conversion History (Kapitel 13) — **Beantwortet: wird gebaut, wie in Kapitel 13 beschrieben**
+`ARCHITECTURE.md` beschreibt das IndexedDB-Schema für die History-Funktion.
 
-Offene Fragen an den Auftraggeber:
-- Soll die History überhaupt gebaut werden, oder ist „kein Account, keine Datenspur" auch hier die einfachere und im Sinne des Projekts konsequentere Wahl?
-- Falls ja: reicht der in Kapitel 13 beschriebene Umfang (Zeitstempel, Formate, Größe, Einstellungen, Status, Dauer; Dateinamen nur separat aktivierbar; 30-Tage-Default-Retention), oder soll er reduziert werden?
-- Opt-in ist in Kapitel 13 als Default „deaktiviert" festgelegt — das wird hier nicht in Frage gestellt, nur die Existenz der Funktion selbst.
+**Entscheidung des Auftraggebers:** Ja, im vollen in Kapitel 13 beschriebenen Umfang — Zeitstempel, Quell-/Zielformat, Dateigröße, Einstellungen, Ergebnisstatus, Dauer; standardmäßig **deaktiviert** (Opt-in); Dateinamen nur bei separater Aktivierung; Aufbewahrungsfrist wählbar, Default 30 Tage, automatische Bereinigung beim App-Start; ein Klick löscht alles. Keine Dateien, Dateiinhalte oder Vorschaubilder werden je gespeichert.
+
+Die Implementierung erfolgt zum in Kapitel 22 vorgesehenen Zeitpunkt (Phase 2, zusammen mit Presets/Rename/PWA/i18n), nicht vorgezogen in Phase 1.
 
 ## Eigene Risikoeinschätzung zu Anforderungen aus dem Auftrag
 

@@ -37,7 +37,7 @@ Conversion-Types folgen Kapitel 5: `native`, `render`, `rasterize`, `embed`, `tr
 |---|---|---|---|---|---|
 | Raster → SVG (embed) | – | ✓ | eigene Implementierung | embed | Ehrlich als „Bild in SVG eingebettet" benannt, nicht als Vektorisierung |
 | Raster → SVG (trace) | – | ✓ | potrace-wasm | trace | Optional, klar von „embed" unterschieden |
-| EPS, AI, PostScript | ✓ | ✓ | Ghostscript-WASM | render | **Offene Entscheidung — siehe RISKS.md. AGPL-Lizenz erzwingt bei Netzerreichbarkeit Quelloffenlegung des gesamten Projekts. Nicht ohne Freigabe implementieren.** |
+| EPS, AI, PostScript | ✓ | ✓ | Ghostscript-WASM | render | **Freigegeben — siehe RISKS.md.** Repository wird bei Integration unter AGPL-3.0-kompatibler Lizenz offengelegt. Bleibt Tier 3, Umsetzung erst nach Phase 1–3. |
 
 ## Grundsatz
 
